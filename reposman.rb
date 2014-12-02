@@ -124,7 +124,7 @@ optparse = OptionParser.new do |opts|
   opts.separator("Examples:")
   opts.separator("  reposman.rb --svn-dir=/var/svn --redmine-host=redmine.host")
   opts.separator("  reposman.rb -s /var/git -r redmine.host -u http://git.host --scm git")
-  opts.separator("  reposman.rb -s / -r redmine.host -u /var/opt/gitlab/git-data/repositories/group/Project.git --scm Git --key KEYREDMINE --addRepository project.identifier.redmine")
+  opts.separator("  reposman.rb -r redmine.host -u /var/opt/gitlab/git-data/repositories/group/Project.git --scm Git --key KEYREDMINE --addRepository project.identifier.redmine")
   opts.separator("")
   opts.separator("You can find more information on the redmine's wiki:\nhttp://www.redmine.org/projects/redmine/wiki/HowTos")
 
@@ -147,13 +147,15 @@ end
 
 $svn_url += "/" if $svn_url and not $svn_url.match(/\/$/)
 
-if ($redmine_host.empty? or $repos_base.empty?)
+if ($redmine_host.empty? or ($repos_base.empty? and $projectIdentifier.empty?))
   puts "Some arguments are missing. Use reposman.rb --help for getting help."
   exit 1
 end
 
 unless File.directory?($repos_base)
-  log("directory '#{$repos_base}' doesn't exists", :exit => true)
+  if ($projectIdentifier.empty?)
+    log("directory '#{$repos_base}' doesn't exists", :exit => true)
+  end
 end
 
 begin
@@ -321,7 +323,7 @@ else
         end
       end
       
-      log("\trepository #{svn_url} created");
+      log("\trepository #{$svn_url} created");
       break;
     end
   end
